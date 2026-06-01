@@ -29,6 +29,45 @@ npm run db:seed
 npm run dev
 ```
 
+For containerized deployments, build the compact web runtime and the separate
+database tooling image:
+
+```powershell
+docker build --target runner -t erp-app:latest .
+docker build --target tooling -t erp-app:tooling .
+```
+
+Run migrations and seed data with the tooling image:
+
+```powershell
+docker run --rm `
+  --network erp-app_default `
+  -e DATABASE_URL="postgresql://postgres:postgres@postgres:5432/erp_pos?schema=public" `
+  erp-app:tooling `
+  npx prisma migrate deploy
+
+docker run --rm `
+  --network erp-app_default `
+  --env-file .env.local `
+  -e DATABASE_URL="postgresql://postgres:postgres@postgres:5432/erp_pos?schema=public" `
+  erp-app:tooling `
+  npm run db:seed
+```
+
+Create the compact web container:
+
+```powershell
+docker run -d `
+  --name erp-app `
+  --restart unless-stopped `
+  --network erp-app_default `
+  -p 3000:3000 `
+  --env-file .env.local `
+  -e DATABASE_URL="postgresql://postgres:postgres@postgres:5432/erp_pos?schema=public" `
+  -e BETTER_AUTH_URL="http://localhost:3000" `
+  erp-app:latest
+```
+
 The seed creates these development accounts:
 
 | Role | Email | Password |
@@ -50,4 +89,3 @@ npm run build
 
 Project-specific working rules and the normalized roadmap are in `.codex/`.
 The original product roadmap is maintained in `.agents/`.
-
