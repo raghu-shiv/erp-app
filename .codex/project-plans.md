@@ -13,7 +13,7 @@
 - [x] Prisma PostgreSQL connection scaffold
 - [x] MVP domain schema scaffold
 - [x] Align Prisma authentication tables with Better Auth
-- [ ] Apply generated initial Prisma migration to a running PostgreSQL service
+- [x] Apply generated initial Prisma migration to a running PostgreSQL service
 - [x] Implement Better Auth email/password login
 - [x] Enforce RBAC guards
 
@@ -21,9 +21,9 @@
 
 - [x] Inventory CRUD and stock tracking
 - [x] Low-stock alerts
-- [ ] POS cart, barcode input, discount, and GST calculations
-- [ ] Checkout, cash/UPI payment logging, and digital receipt
-- [ ] Daily sales and inventory reports
+- [x] POS cart, barcode input, discount, and GST calculations
+- [x] Checkout, cash/UPI payment logging, and digital receipt
+- [x] Daily sales and inventory reports
 
 ## Phase 4: Containerization and Handoff
 
