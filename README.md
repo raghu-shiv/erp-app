@@ -3,6 +3,20 @@
 Online-first ERP and point-of-sale MVP built with Next.js 16, React 19,
 PostgreSQL, Prisma, Better Auth, and Tailwind CSS 4.
 
+## Current MVP Scope
+
+- Better Auth email/password login with role-based access checks.
+- Logout from the protected app shell.
+- Dashboard, POS terminal, inventory, purchases, orders, and reports.
+- POS cart with barcode/SKU search, discounts, GST calculation, cash/UPI/card
+  payment selection, checkout, receipt view, and stock decrement.
+- Inventory tracking with low-stock alerts and stock adjustment API.
+- Purchase stock inward module with barcode/SKU scan entry and manual line
+  upload in `SKU-or-barcode, quantity` format.
+- Daily sales, tax, order, and inventory value reports.
+- Next.js standalone Docker runtime image plus a separate tooling image for
+  Prisma operations.
+
 ## Local Setup
 
 Create `.env.local` with:
@@ -13,60 +27,38 @@ BETTER_AUTH_URL=http://localhost:3000
 NEXT_PUBLIC_APP_NAME=ERP POS System
 ```
 
-Start PostgreSQL manually with Docker Compose:
+Start the full Compose stack:
 
 ```powershell
-docker compose up -d postgres
+docker compose --env-file .env.local up -d postgres app
 ```
 
-Use the local Docker PostgreSQL connection while applying the generated
-migration and seed data:
+Build both the compact runtime image and the Prisma tooling image:
 
 ```powershell
-$env:DATABASE_URL="postgresql://postgres:postgres@localhost:5432/erp_pos?schema=public"
-npx prisma migrate deploy
-npm run db:seed
-npm run dev
+docker compose --env-file .env.local --profile tools build app tooling
 ```
 
-For containerized deployments, build the compact web runtime and the separate
-database tooling image:
+Apply migrations and seed data through the tooling image:
 
 ```powershell
-docker build --target runner -t erp-app:latest .
-docker build --target tooling -t erp-app:tooling .
+docker compose --env-file .env.local --profile tools run --rm tooling npx prisma migrate deploy
+docker compose --env-file .env.local --profile tools run --rm tooling npm run db:seed
 ```
 
-Run migrations and seed data with the tooling image:
+The expected ERP containers are:
 
-```powershell
-docker run --rm `
-  --network erp-app_default `
-  -e DATABASE_URL="postgresql://postgres:postgres@postgres:5432/erp_pos?schema=public" `
-  erp-app:tooling `
-  npx prisma migrate deploy
+| Container | Purpose |
+| --- | --- |
+| `erp-pos-prototype` | Next.js standalone app on port `3000` |
+| `erp-pos-postgres` | PostgreSQL 17 database on port `5432` |
 
-docker run --rm `
-  --network erp-app_default `
-  --env-file .env.local `
-  -e DATABASE_URL="postgresql://postgres:postgres@postgres:5432/erp_pos?schema=public" `
-  erp-app:tooling `
-  npm run db:seed
-```
+The expected ERP images are:
 
-Create the compact web container:
-
-```powershell
-docker run -d `
-  --name erp-app `
-  --restart unless-stopped `
-  --network erp-app_default `
-  -p 3000:3000 `
-  --env-file .env.local `
-  -e DATABASE_URL="postgresql://postgres:postgres@postgres:5432/erp_pos?schema=public" `
-  -e BETTER_AUTH_URL="http://localhost:3000" `
-  erp-app:latest
-```
+| Image | Purpose |
+| --- | --- |
+| `erp-pos-prototype:latest` | Compact standalone runtime image |
+| `erp-pos-prototype:tooling` | Tooling image with Prisma, source, and dependencies |
 
 The seed creates these development accounts:
 
@@ -79,13 +71,21 @@ The seed creates these development accounts:
 ## Verification
 
 ```powershell
-npm run db:generate
-npx prisma validate
 npx tsc --noEmit
+npm run lint
+npm test
+npx prisma validate
 npm run build
+docker compose --env-file .env.local --profile tools build app tooling
+docker compose --env-file .env.local up -d postgres app
 ```
+
+Current smoke coverage includes admin login, protected route access for
+`/dashboard`, `/inventory`, `/purchases`, `/orders`, `/reports`, and a stock
+inward API post to `/api/purchases/stock-inward`.
 
 ## Agent Guidance
 
 Project-specific working rules and the normalized roadmap are in `.codex/`.
-The original product roadmap is maintained in `.agents/`.
+The previous `.agents/` folder was permanently removed; `.codex/` is now the
+active project guidance source.

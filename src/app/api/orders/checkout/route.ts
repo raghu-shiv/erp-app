@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { orderReceiptInclude, serializeReceipt } from "@/lib/orders";
 import { checkoutSchema } from "@/lib/validators/checkout";
 import type { PaymentMethod } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 const CHECKOUT_CONFLICT = "CHECKOUT_CONFLICT";
@@ -117,6 +118,10 @@ export async function POST(request: Request) {
       return serializeReceipt(order);
     }, { isolationLevel: "Serializable" });
 
+    revalidatePath("/dashboard");
+    revalidatePath("/inventory");
+    revalidatePath("/orders");
+    revalidatePath("/reports");
     return NextResponse.json({ receipt }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message.startsWith(CHECKOUT_CONFLICT)) {
@@ -125,4 +130,3 @@ export async function POST(request: Request) {
     throw error;
   }
 }
-

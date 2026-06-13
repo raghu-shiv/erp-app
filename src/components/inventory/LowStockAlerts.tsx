@@ -18,10 +18,17 @@ export function LowStockAlerts({ products }: { products: LowStockProduct[] }) {
   return (
     <ul className="space-y-3">
       {products.map((product) => (
-        <li key={product.id} className="flex items-center justify-between rounded-lg bg-amber-50 px-4 py-3 dark:bg-amber-950/30">
+        <li
+          key={product.id}
+          className="flex items-center justify-between rounded-lg bg-amber-50 px-4 py-3 dark:bg-amber-950/30"
+        >
           <div>
-            <p className="text-sm font-medium text-slate-800 dark:text-white">{product.name}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{product.sku}</p>
+            <p className="text-sm font-medium text-slate-800 dark:text-white">
+              {product.name}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {product.sku}
+            </p>
           </div>
           <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">
             {product.stockQuantity} / {product.minStockAlert}
@@ -31,4 +38,3 @@ export function LowStockAlerts({ products }: { products: LowStockProduct[] }) {
     </ul>
   );
 }
-

@@ -21,21 +21,44 @@ export const productInputSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
-export const productUpdateSchema = productInputSchema.omit({ stockQuantity: true }).partial();
+export const productUpdateSchema = productInputSchema
+  .omit({ stockQuantity: true })
+  .partial();
 
 export const stockAdjustmentSchema = z
   .object({
     transactionType: z.enum(["IN", "OUT", "ADJUSTMENT"]),
-    quantity: z.coerce.number().int().refine((quantity) => quantity !== 0, {
-      message: "Quantity must not be zero",
-    }),
+    quantity: z.coerce
+      .number()
+      .int()
+      .refine((quantity) => quantity !== 0, {
+        message: "Quantity must not be zero",
+      }),
     reason: z.string().trim().min(1).max(240),
     referenceId: optionalText,
   })
   .refine(
-    ({ quantity, transactionType }) => transactionType === "ADJUSTMENT" || quantity > 0,
+    ({ quantity, transactionType }) =>
+      transactionType === "ADJUSTMENT" || quantity > 0,
     {
       message: "Inbound and outbound quantities must be positive",
       path: ["quantity"],
     },
   );
+
+export const stockInwardLineSchema = z
+  .object({
+    lookup: z.string().trim().min(1).max(160),
+    quantity: z.coerce.number().int().positive(),
+  })
+  .refine(({ lookup }) => lookup.length > 0, {
+    message: "SKU, barcode, or product ID is required",
+    path: ["lookup"],
+  });
+
+export const stockInwardSchema = z.object({
+  referenceId: optionalText,
+  supplierId: optionalText,
+  reason: z.string().trim().min(1).max(240).default("Stock inward"),
+  lines: z.array(stockInwardLineSchema).min(1).max(100),
+});

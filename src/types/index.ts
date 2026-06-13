@@ -1,1 +1,0 @@
-export type { UserRole } from "@prisma/client";

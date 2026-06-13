@@ -1,6 +1,9 @@
 import { PosTerminal } from "@/components/pos/PosTerminal";
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/rbac";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "POS Terminal" };
 
 export default async function PosPage() {
   await requirePermission("orders:create");
@@ -10,16 +13,19 @@ export default async function PosPage() {
     orderBy: { name: "asc" },
   });
 
-  return <PosTerminal products={products.map((product) => ({
-    id: product.id,
-    name: product.name,
-    sku: product.sku,
-    barcode: product.barcode,
-    price: Number(product.price),
-    taxRate: Number(product.taxRate),
-    stockQuantity: product.stockQuantity,
-    unit: product.unit,
-    category: product.category?.name ?? "Uncategorized",
-  }))} />;
+  return (
+    <PosTerminal
+      products={products.map((product) => ({
+        id: product.id,
+        name: product.name,
+        sku: product.sku,
+        barcode: product.barcode,
+        price: Number(product.price),
+        taxRate: Number(product.taxRate),
+        stockQuantity: product.stockQuantity,
+        unit: product.unit,
+        category: product.category?.name ?? "Uncategorized",
+      }))}
+    />
+  );
 }
-

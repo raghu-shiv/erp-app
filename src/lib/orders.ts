@@ -46,4 +46,3 @@ export function serializeReceipt(order: OrderReceipt) {
     })),
   };
 }
-

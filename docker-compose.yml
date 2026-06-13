@@ -1,6 +1,8 @@
 services:
   postgres:
+    container_name: erp-pos-postgres
     image: postgres:17-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: erp_pos
       POSTGRES_USER: postgres
@@ -16,6 +18,9 @@ services:
       retries: 10
 
   app:
+    container_name: erp-pos-prototype
+    image: erp-pos-prototype:latest
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile
@@ -32,6 +37,7 @@ services:
         condition: service_healthy
 
   tooling:
+    image: erp-pos-prototype:tooling
     profiles: ["tools"]
     build:
       context: .

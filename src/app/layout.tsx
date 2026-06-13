@@ -13,8 +13,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ERP POS System",
-  description: "Enterprise Resource Planning & Point of Sale Management System",
+  title: {
+    default: "ERP POS System",
+    template: "%s | ERP POS System",
+  },
+  description: "Secure enterprise resource planning and point-of-sale management system.",
+  applicationName: "ERP POS System",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+  },
 };
 
 export default function RootLayout({

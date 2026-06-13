@@ -1,5 +1,4 @@
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getCurrentSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import type { UserRole } from "@prisma/client";
 
@@ -9,42 +8,54 @@ import type { UserRole } from "@prisma/client";
  */
 const PERMISSIONS: Record<string, UserRole[]> = {
   // Dashboard
-  "dashboard:view":       ["ADMIN", "MANAGER", "CASHIER", "INVENTORY_MANAGER", "QC_MANAGER", "SUPERVISOR", "WORKER"],
+  "dashboard:view": [
+    "ADMIN",
+    "MANAGER",
+    "CASHIER",
+    "INVENTORY_MANAGER",
+    "QC_MANAGER",
+    "SUPERVISOR",
+    "WORKER",
+  ],
 
   // Sales & Billing
-  "orders:create":        ["ADMIN", "MANAGER", "CASHIER"],
-  "orders:view":          ["ADMIN", "MANAGER", "CASHIER"],
-  "orders:void":          ["ADMIN", "MANAGER"],
-  "orders:refund":        ["ADMIN", "MANAGER"],
+  "orders:create": ["ADMIN", "MANAGER", "CASHIER"],
+  "orders:view": ["ADMIN", "MANAGER", "CASHIER"],
+  "orders:void": ["ADMIN", "MANAGER"],
+  "orders:refund": ["ADMIN", "MANAGER"],
 
   // Inventory
-  "inventory:view":       ["ADMIN", "MANAGER", "INVENTORY_MANAGER", "QC_MANAGER"],
-  "inventory:create":     ["ADMIN", "MANAGER", "INVENTORY_MANAGER"],
-  "inventory:update":     ["ADMIN", "MANAGER", "INVENTORY_MANAGER"],
-  "inventory:delete":     ["ADMIN"],
+  "inventory:view": ["ADMIN", "MANAGER", "INVENTORY_MANAGER", "QC_MANAGER"],
+  "inventory:create": ["ADMIN", "MANAGER", "INVENTORY_MANAGER"],
+  "inventory:update": ["ADMIN", "MANAGER", "INVENTORY_MANAGER"],
+  "inventory:delete": ["ADMIN"],
+
+  // Purchases / Stock Inward
+  "purchases:view": ["ADMIN", "MANAGER", "INVENTORY_MANAGER"],
+  "purchases:create": ["ADMIN", "MANAGER", "INVENTORY_MANAGER"],
 
   // Products
-  "products:view":        ["ADMIN", "MANAGER", "CASHIER", "INVENTORY_MANAGER"],
-  "products:create":      ["ADMIN", "MANAGER", "INVENTORY_MANAGER"],
-  "products:update":      ["ADMIN", "MANAGER", "INVENTORY_MANAGER"],
-  "products:delete":      ["ADMIN"],
+  "products:view": ["ADMIN", "MANAGER", "CASHIER", "INVENTORY_MANAGER"],
+  "products:create": ["ADMIN", "MANAGER", "INVENTORY_MANAGER"],
+  "products:update": ["ADMIN", "MANAGER", "INVENTORY_MANAGER"],
+  "products:delete": ["ADMIN"],
 
   // Reports
-  "reports:view":         ["ADMIN", "MANAGER"],
-  "reports:export":       ["ADMIN", "MANAGER"],
+  "reports:view": ["ADMIN", "MANAGER"],
+  "reports:export": ["ADMIN", "MANAGER"],
 
   // User Management
-  "users:view":           ["ADMIN", "MANAGER"],
-  "users:create":         ["ADMIN"],
-  "users:update":         ["ADMIN"],
-  "users:delete":         ["ADMIN"],
+  "users:view": ["ADMIN", "MANAGER"],
+  "users:create": ["ADMIN"],
+  "users:update": ["ADMIN"],
+  "users:delete": ["ADMIN"],
 
   // Suppliers
-  "suppliers:view":       ["ADMIN", "MANAGER", "INVENTORY_MANAGER"],
-  "suppliers:manage":     ["ADMIN", "MANAGER"],
+  "suppliers:view": ["ADMIN", "MANAGER", "INVENTORY_MANAGER"],
+  "suppliers:manage": ["ADMIN", "MANAGER"],
 
   // Audit Logs
-  "audit:view":           ["ADMIN"],
+  "audit:view": ["ADMIN"],
 };
 
 /**
@@ -62,9 +73,7 @@ export function hasPermission(role: UserRole, permission: string): boolean {
  * Returns the session if authenticated.
  */
 export async function requireAuth() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getCurrentSession();
   if (!session?.user || !session.user.isActive) {
     redirect("/login");
   }

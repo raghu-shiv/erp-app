@@ -30,8 +30,15 @@ export function fromCents(cents: number): number {
   return cents / 100;
 }
 
-export function calculateBilling(items: BillingItemInput[], discountPercent = 0): BillingTotals {
-  if (!Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent > 100) {
+export function calculateBilling(
+  items: BillingItemInput[],
+  discountPercent = 0,
+): BillingTotals {
+  if (
+    !Number.isFinite(discountPercent) ||
+    discountPercent < 0 ||
+    discountPercent > 100
+  ) {
     throw new Error("Discount percent must be between 0 and 100");
   }
 
@@ -60,8 +67,12 @@ export function calculateBilling(items: BillingItemInput[], discountPercent = 0)
       lines: [...totals.lines, line],
       subtotal: fromCents(toCents(totals.subtotal) + toCents(line.subtotal)),
       taxAmount: fromCents(toCents(totals.taxAmount) + toCents(line.taxAmount)),
-      discountAmount: fromCents(toCents(totals.discountAmount) + toCents(line.discountAmount)),
-      totalAmount: fromCents(toCents(totals.totalAmount) + toCents(line.totalAmount)),
+      discountAmount: fromCents(
+        toCents(totals.discountAmount) + toCents(line.discountAmount),
+      ),
+      totalAmount: fromCents(
+        toCents(totals.totalAmount) + toCents(line.totalAmount),
+      ),
     }),
     { lines: [], subtotal: 0, taxAmount: 0, discountAmount: 0, totalAmount: 0 },
   );
@@ -73,4 +84,3 @@ export function formatCurrency(amount: number): string {
     currency: "INR",
   }).format(amount);
 }
-
